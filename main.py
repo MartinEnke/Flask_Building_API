@@ -13,16 +13,27 @@ def home():
     return "Welcome to the Book API!"
 
 
+def validate_book_data(data):
+    if "title" not in data or "author" not in data:
+        return False
+    return True
+
+
 @app.route('/api/books', methods=['GET', 'POST'])
 def handle_books():
 
     if request.method == 'POST':
         data = request.get_json()
+        if not validate_book_data(data):
+            return jsonify({"error": "Invalid Book Data"}), 400
+
         new_book = {
             "id": len(books) + 1,
             "title": data.get("title"),
             "author": data.get("author")
         }
+
+
         books.append(new_book)
         return jsonify(new_book), 201
 
@@ -68,4 +79,4 @@ def method_not_allowed(error):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5017)
+    app.run(host="0.0.0.0", port=5018)
