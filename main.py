@@ -21,8 +21,21 @@ def validate_book_data(data):
 
 @app.route('/api/books', methods=['GET', 'POST'])
 def handle_books():
+    # filtering books by f.e. author or title OR return all books via GET
+    if request.method == "GET":
+        author = request.args.get('author')
+        title = request.args.get('title')
+        if author:
+            books_by_author = [book for book in books if book["author"].lower() == author.lower()]
+            return jsonify(books_by_author)
+        if title:
+            books_by_title = [book for book in books if book["title"].lower() == title.lower()]
+            return jsonify(books_by_title)
+        else:
+            return jsonify(books)
 
-    if request.method == 'POST':
+    # or add new book if POST
+    elif request.method == 'POST':
         data = request.get_json()
         if not validate_book_data(data):
             return jsonify({"error": "Invalid Book Data"}), 400
@@ -32,13 +45,16 @@ def handle_books():
             "title": data.get("title"),
             "author": data.get("author")
         }
-
-
         books.append(new_book)
         return jsonify(new_book), 201
 
-    else:
-        return jsonify(books)
+
+
+
+
+
+
+
 
 
 def find_book_by_id(book_id):
