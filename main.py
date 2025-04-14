@@ -57,5 +57,15 @@ def update_book(id):
         return jsonify(book), 200
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify({"error": "Not Found"}), 404
+
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({"error": "Method Not Allowed"}), 405
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5017)
