@@ -2,6 +2,9 @@ from flask import Flask, jsonify, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging
+from logging.handlers import RotatingFileHandler
+import os
+
 
 app = Flask(__name__)
 limiter = Limiter(app=app, key_func=get_remote_address)
@@ -10,6 +13,23 @@ limiter = Limiter(app=app, key_func=get_remote_address)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+# Create a logs directory if it doesn't exist
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+
+# Set up logging to file
+file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=3)
+file_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+file_handler.setFormatter(formatter)
+
+''' check logs via - cat logs/app.log - in the terminal '''
+
+
+# Attach handler to Flask's logger
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
 
 
 @app.route('/')
