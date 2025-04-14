@@ -1,8 +1,11 @@
 from flask import Flask, jsonify, request
-import requests
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
-
+limiter = Limiter(app=app, key_func=get_remote_address)
+# Limiter(...) connects the limiter to your Flask app.
+# ensures rate limits apply per IP address (each visitor gets their own quota).
 
 @app.route('/')
 def home():
@@ -16,7 +19,8 @@ def validate_book_data(data):
 
 
 @app.route('/api/books', methods=['GET', 'POST'])
-def handle_books():
+@limiter.limit("10/minute")  # Limit to 10 requests per minute
+def handle_books():          # If limit is exceeded, server will return a 429 Too Many Requests error.
     # filtering books by f.e. author or title OR return all books via GET
     if request.method == "GET":
         author = request.args.get('author')
